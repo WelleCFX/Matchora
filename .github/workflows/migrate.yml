@@ -1,0 +1,29 @@
+name: Migrate
+on:
+  workflow_dispatch:
+    inputs:
+      admin_email:
+        description: "Имейл на администратор (по избор)"
+        required: false
+        default: ""
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          [ -n "$DATABASE_URL" ] || { echo "Липсва secret DATABASE_URL"; exit 1; }
+          npm run migrate
+      - name: Admin
+        if: ${{ inputs.admin_email != '' }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npm run make-staff -- "${{ inputs.admin_email }}" admin
