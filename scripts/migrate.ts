@@ -2,12 +2,13 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { Client } from 'pg';
 import { loadEnv } from '../lib/env';
+import { pgConfig } from '../lib/pgconfig';
 
 async function main() {
   loadEnv();
   const url = process.env.DATABASE_URL;
   if (!url) throw new Error('DATABASE_URL липсва');
-  const c = new Client({ connectionString: url });
+  const c = new Client(pgConfig(url));
   await c.connect();
   // Търсенето разчита на UTF-8 база с локал, който разпознава кирилица (напр. C.UTF-8 или bg_BG.UTF-8).
   const chk = await c.query("select current_setting('server_encoding') enc, to_tsvector('simple','ремонт')::text lex");

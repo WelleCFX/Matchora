@@ -1,10 +1,11 @@
+import { pgConfig } from './pgconfig';
 import { Pool, type PoolClient } from 'pg';
 
 const g = globalThis as unknown as { __pool?: Pool };
 export function pool(): Pool {
   if (!g.__pool) {
     if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL липсва');
-    g.__pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 10 });
+    g.__pool = new Pool({ ...pgConfig(process.env.DATABASE_URL), max: Number(process.env.DB_POOL_MAX || (process.env.VERCEL ? 3 : 10)) });
   }
   return g.__pool;
 }

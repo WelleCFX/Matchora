@@ -57,3 +57,15 @@ node tests/e2e-company.cjs     # фирми, екип, проверка от а�
 
 ## Извън обхвата засега
 ЕИК се проверява само по контролна цифра и от администратор ръчно (няма автоматична връзка с Търговския регистър); членовете на екипа не работят с поръчките; SMS/push, спорове с арбитраж, комисиони и escrow, AI помощник (Етап 2 и 3).
+
+## Деплой на Vercel (стъпки)
+1. **База:** създайте Postgres (напр. Neon или Supabase) в UTF-8 база; изпълнете `CREATE EXTENSION pg_trgm;`. Вземете *pooled* connection string (с `sslmode=require`). Локалът трябва да разпознава кирилица – при Neon/Supabase по подразбиране е ОК; `npm run migrate` ще спре с грешка, ако не е.
+2. **Миграции от вашия компютър:** `DATABASE_URL="<url>" npm run migrate`, после `DATABASE_URL="<url>" npm run make-staff -- you@example.com admin`.
+3. **Качете кода в GitHub** и в Vercel изберете *Add New → Project → Import*. Framework: Next.js (автоматично).
+4. **Environment Variables** (Production): `DATABASE_URL`, `APP_URL` (https://вашият-домейн), `APP_SECRET` (`openssl rand -hex 32`), `CRON_SECRET` (`openssl rand -hex 24`), `SMTP_URL`, `MAIL_FROM`, `PAYMENT_PROVIDER=stripe`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`. Не задавайте `PAYMENT_PROVIDER=mock` в продукция.
+5. **Stripe webhook:** endpoint `https://вашият-домейн/api/webhooks/stripe` (събитията са изброени по-горе).
+6. **Cron за имейли:** `vercel.json` пуска `/api/cron/mail` веднъж дневно (лимит на Hobby плана; Vercel праща `Authorization: Bearer $CRON_SECRET` автоматично). Имейлите се опитват да излязат веднага, кронът е само резерва; на Pro план сменете на `*/5 * * * *`.
+7. Свържете домейна от *Settings → Domains*, после влезте, включете 2FA на админа от `/security`.
+
+### Supabase
+`DATABASE_URL` за **Vercel**: Supabase → Connect → *Transaction pooler* (порт 6543), със `?sslmode=require` в края. За миграциите (GitHub Actions secret `DATABASE_URL`) ползвайте *Session pooler* (порт 5432 на pooler хоста; директната връзка е само IPv6). Паролата с специални символи се кодира в URL (напр. `@` → `%40`). Workflow-ът *Migrate* (Actions → Run workflow) пуска миграциите и по желание прави регистриран потребител администратор.
