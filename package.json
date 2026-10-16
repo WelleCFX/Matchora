@@ -1,0 +1,40 @@
+{
+  "name": "matchora",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "migrate": "tsx scripts/migrate.ts",
+    "test": "tsx --test tests/core.test.ts tests/totp.test.ts tests/mail.test.ts tests/stripe.test.ts tests/ads.test.ts tests/company.test.ts",
+    "test:e2e": "node tests/e2e.cjs && node tests/e2e-2fa.cjs && node tests/e2e-market.cjs && node tests/e2e-company.cjs",
+    "make-staff": "tsx scripts/make-staff.ts",
+    "mail:flush": "tsx scripts/mail-flush.ts"
+  },
+  "dependencies": {
+    "@node-rs/argon2": "^2.2.2",
+    "next": "^15.5.28",
+    "nodemailer": "^10.1.1",
+    "pg": "^8.23.1",
+    "qrcode": "^1.5.4",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/nodemailer": "^8.0.2",
+    "@types/pg": "^8.23.1",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/smtp-server": "^3.5.13",
+    "autoprefixer": "^10.6.1",
+    "postcss": "^8.5.30",
+    "smtp-server": "^3.19.22",
+    "tailwindcss": "^3.4.19",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3"
+  }
+}
